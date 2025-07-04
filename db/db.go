@@ -11,7 +11,7 @@ import (
 )
 
 func Connect_to_database() (*sql.DB, error) {
-	err := godotenv.Load("dostonproject/.env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Ошибка при загрузке .env файла")
 	}

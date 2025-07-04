@@ -36,11 +36,12 @@ func Get_html(db *sql.DB) http.HandlerFunc {
 			log.Fatal("Ошибка во время открытия", err)
 		}
 		doc.Find("script , style , nav , footer , header").Remove()
-		var text []string
-		doc.Find("p , h1 , h2 , h3 , arcticle , img , strong , section, code").Each(func(i int, s *goquery.Selection) {
+		var text string
+		doc.Find("p , h1 , h2 , h3 , arcticle , img , strong , section, code , br").Each(func(i int, s *goquery.Selection) {
 			content := strings.TrimSpace(s.Text())
-			text = append(text, content)
+			text += content
 		})
+		fmt.Printf(text)
 		title := ""
 		doc.Find("title").Each(func(i int, s *goquery.Selection) {
 			s.SetText(title)
@@ -49,6 +50,9 @@ func Get_html(db *sql.DB) http.HandlerFunc {
 		err = os.WriteFile("outputs/"+title, []byte(result), 0644)
 		if err != nil {
 			log.Fatal("Не удалось сохранить файл", err)
+		}
+		if len(result) == 0 {
+			log.Fatal("Пустой ответ", err)
 		}
 		path := fmt.Sprintf("outputs/%s", title)
 		db.Exec("INSERT INTO files(title , path) values($1 , $2)", title, path)

@@ -13,17 +13,20 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const groqURL = "https://api.groq.com/openai/v1/chat/completions"
+const groqURL = "https://openrouter.ai/api/v1/chat/completions"
 
-func Send_api_request(html []string, title string) string {
-	err := godotenv.Load("dostonproject/.env")
+func Send_api_request(html string, title string) string {
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Ошибка при загрузке .env файла", err)
 	}
-	req_string := fmt.Sprintf("на основе данного тебе html файла верни новый html файл весь контент перефразируй так чтобы он отличался от оригинального на 70% но чтобы сам смысл статьи не менялся \n %s	", html)
+	req_string := fmt.Sprintf("by basing on this text rewrite 70% , but the meaning has to stay same \n %s	", html)
 	api := os.Getenv("API_KEY")
+	if api == "" {
+		log.Fatal("Пустой api ключ", err)
+	}
 	req := models.ApiRequest{
-		Model: "llama-3.3-70b-versatile",
+		Model: "mistralai/mixtral-8x7b-32768",
 		Messages: []models.ApiMessage{{
 			Role:    "user",
 			Content: req_string,
@@ -54,6 +57,9 @@ func Send_api_request(html []string, title string) string {
 	}
 	if err := json.Unmarshal(respBody, &apiResponse); err != nil {
 		log.Fatal("Ошибка при распаковке json файла", err)
+	}
+	if len(apiResponse.Choices) == 0 {
+		log.Fatal("Пустой ответ ии", err)
 	}
 	return apiResponse.Choices[0].Message.Content
 }
